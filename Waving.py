@@ -1,5 +1,5 @@
 # Les sources du Viok
-# Waving 2022(c)CHEB from Amstrad 6128 old source 1987
+# Waving 2022(c)CHEB
 
 import pygame
 from pygame.locals import *
@@ -57,10 +57,51 @@ def main():
             xvo=tvx
             xp=xp+step_x
 
+
+
+        # Calcul a la main
+        # x echantillon
+        # NN taille de l'echantillon
+        # Real & Imag liste reel et imaginaire pour chaque value
+        # FnMag liste de la magnetude de transformation (|a+bi|)
+
+        pie = 3.141592
+        NN = 300
+        FnCmplx  = [[0 for i in range(2)] for i in range(NN)]
+        FnMag = [0 for i in range(NN)]
+        Real = [0 for i in range(NN)]
+        Imag = [0 for i in range(NN)]
+
+        FnCmplx[0][0] = np.sum(x)
+        FnCmplx[0][1] = 0
+        
+
+        for kk in range(1,150):
+            Real[0] = x[0]
+            Imag[0] = 0
+            for ii in range(1,NN):
+                Real[ii] = x[ii] * math.cos(2 * pie * ii * kk / NN)
+                Imag[ii] = x[ii] * -1 * math.sin(2 * pie * ii * kk / NN)
+            FnCmplx[kk][0] = np.sum(Real)
+            FnCmplx[kk][1] = np.sum(Imag)
+
+            FnMag[kk] = math.sqrt(FnCmplx[kk][0] ** 2 + FnCmplx[kk][1] ** 2)
+
+        # Graph dans les frequences
+        xp=300
+        posy = 400 
+        xvo=posy
+        step_x = 2
+        for xv in FnMag[0:NN]:
+            tvx=posy-xv/4
+            pygame.draw.line(screen, line_color, (xp,posy),(xp,tvx))
+            xvo=tvx
+            xp=xp+step_x
+
+        # Calcul par fonction
         # Calc fft
         tfd = np.fft.fft(x,1024)
         spectre =np.absolute(tfd)
-
         # Graph dans les frequences
         xp=300
         posy = 700 
