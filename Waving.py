@@ -26,12 +26,26 @@ def main():
     while 1==1:
         screen.fill(screen_color) # vide screen
 
-        alpha += 2
-
+        alpha += 1
+        alpha_t = alpha * 0.0174
         # Generation son + bruit
         t = np.arange(1024*1000)/sample_rate # time vector
         f = 50e3 + 30e3 * math.cos(alpha*0.0174) # freq of tone
+        
+        # freq seul
+        x = np.sin(2*np.pi*f*t)
+        
+        # freq seul + bruit
         x = np.sin(2*np.pi*f*t) + 0.2*np.random.randn(len(t))
+        
+        # 2 freq 
+        x = np.sin(2*np.pi*f*t) +  2 * np.sin(2*np.pi*f/2*t*4) 
+
+        # freq modul
+        x = 4*np.cos(alpha_t)*np.sin(2*np.pi*(f*np.sin(alpha_t*0.2))*(2*t*np.cos(alpha_t/2))) 
+
+        # freq modul
+        x = 4*np.cos(alpha_t)*np.sin(2*np.pi*(f*np.sin(alpha_t*2))*(2*t*np.cos(alpha_t/2))) + +  2 * np.sin(2*np.pi*f/2*t*4) 
 
         # Graph dans le temps
         xp=0
@@ -43,22 +57,18 @@ def main():
             xvo=tvx
             xp=xp+step_x
 
-        # Calc spectre
-        fft_size = 1024
-        num_rows = int(np.floor(len(x)/fft_size))
-        spectrogram = np.zeros((num_rows, fft_size))
-        spectrogramm = np.zeros(fft_size)
-        for i in range(num_rows):
-            spectrogram[i,:] = 10*np.log10(np.abs(np.fft.fftshift(np.fft.fft(x[i*fft_size:(i+1)*fft_size])))**2)
-        spectrogram = spectrogram[:,fft_size//2:]
+        # Calc fft
+        tfd = np.fft.fft(x,1024)
+        spectre =np.absolute(tfd)
 
         # Graph dans les frequences
-        xp=0
-        xvo=0
+        xp=300
+        posy = 700 
+        xvo=posy
         step_x = 1
-        for xv in spectrogram[512,:]:
-            tvx=300+xv
-            pygame.draw.line(screen, line_color, (xp-step_x,xvo),(xp,tvx))
+        for xv in spectre[0:512]:
+            tvx=posy-xv/4
+            pygame.draw.line(screen, line_color, (xp,posy),(xp,tvx))
             xvo=tvx
             xp=xp+step_x
         # Affichage
